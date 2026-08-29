@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Rodinný fotorámeček</string>
+    <string name="nadpis_opravneni">Vítejte v rodinném fotorámečku</string>
+    <string name="popis_opravneni">Aby aplikace mohla zobrazovat fotky a videa, která vám chodí přes WhatsApp, potřebuje přístup ke všem souborům v telefonu.\n\nKlepněte na tlačítko níže, v Nastavení najděte tuto aplikaci a povolte jí přístup ke správě všech souborů.</string>
+    <string name="tlacitko_povolit">Otevřít nastavení a povolit přístup</string>
+</resources>
