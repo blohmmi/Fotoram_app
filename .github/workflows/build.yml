@@ -1,39 +1,31 @@
-# Automaticke sestaveni APK pri kazdem pushi do vetve main.
-# Hotovy APK se objevi jako "artifact" ke stazeni v zalozce Actions na GitHubu.
-name: Sestavit APK
+name: Build APK
 
 on:
   push:
-    branches: [ main ]
+    branches: [main, master]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Stahnout kod repozitare
+      - name: Stáhnout kód
         uses: actions/checkout@v4
 
-      - name: Nastavit Javu (JDK 17)
+      - name: Nastavit Javu
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
-
-      - name: Dodatecne nainstalovat potrebne casti Android SDK
-        run: |
-          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-34" "build-tools;34.0.0"
+          java-version: '17'
 
       - name: Nastavit Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.7"
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Sestavit debug APK
         run: gradle assembleDebug --no-daemon
 
-      - name: Nahrat APK jako artifact
+      - name: Nahrát APK jako artifact
         uses: actions/upload-artifact@v4
         with:
           name: rodinny-fotoramecek-apk
