@@ -94,29 +94,55 @@ objeví ve slideshow.
 
 ---
 
-## 5. Jak změnit časy okna 13–17 h a rychlost slideshow
+## 5. Jak změnit časy okna, rychlost slideshow a počet nejnovějších fotek
 
 Vše se nastavuje v jednom souboru:
 [`app/src/main/assets/app.js`](app/src/main/assets/app.js), úplně nahoře:
 
 ```js
-const OKNO_START = "13:00";   // od tohoto casu se pres den zobrazuji jen DNESNI fotky
-const OKNO_KONEC = "17:00";   // do tohoto casu plati stejne pravidlo
-const INTERVAL_SEKUND = 10;   // jak dlouho se drzi jedna fotka na obrazovce
+const OKNO_START = "13:00";   // od tohoto casu se pres den zobrazuje jen omezeny vyber
+const OKNO_KONEC = "18:00";   // do tohoto casu plati stejne pravidlo
+const POCET_NEJNOVEJSICH_V_OKNE = 20; // kolik nejnovejsich polozek se v okne zobrazuje
+const INTERVAL_SEKUND = 10;   // jak dlouho se drzi jedna (bezna) fotka na obrazovce
+const TRVANI_NOVE_FOTKY_MS = 60 * 1000; // jak dlouho se drzi CERSTVE prijata fotka
 const OBNOVA_SEZNAMU_MS = 60 * 1000; // jak casto se kontroluje, jestli neprisly nove fotky
 ```
 
-Například pro okno 12:00–18:00 a 15 sekund na fotku uprav na:
+Aktuální nastavení: mezi **13:00 a 18:00** se prochází pouze **20 nejnovějších**
+fotek/videí (dokola, v náhodném pořadí); mimo toto okno se prochází úplně
+všechno. Například pro okno 12:00–19:00 a 30 nejnovějších uprav na:
 
 ```js
 const OKNO_START = "12:00";
-const OKNO_KONEC = "18:00";
-const INTERVAL_SEKUND = 15;
+const OKNO_KONEC = "19:00";
+const POCET_NEJNOVEJSICH_V_OKNE = 30;
 ```
 
 Uprav, ulož, a proveď kroky z bodu 1 (`git add`, `git commit`, `git push`) —
 GitHub automaticky sestaví nové APK, které si podle bodu 2–3 staneš stáhnout
 a nainstalovat.
+
+### Fotky/videa starší než měsíc
+
+Ty se do slideshow vůbec nezařazují. Nastavuje se to v
+[`MediaBridge.kt`](app/src/main/java/com/rodina/fotoramecek/MediaBridge.kt)
+konstantou `POCET_MESICU_ULOZENI = 1` (v měsících).
+
+### Nová fotka přijde okamžitě na řadu
+
+Jakmile telefon zaznamená novou fotku (kontrola běží každou minutu), slideshow
+ji hned přeruší, zobrazí ji na 60 sekund (`TRVANI_NOVE_FOTKY_MS`), a pak se
+vrátí přesně tam, kde předtím skončila. Nové video se taky zobrazí hned, ale
+přehraje se celé (má vlastní délku).
+
+### Popisek (komentář) k fotce
+
+Pokud fotka z WhatsAppu má komentář/popisek, aplikace se ho pokusí přečíst a
+zobrazit pod fotkou. Toto **není oficiálně zdokumentované chování WhatsAppu**
+— hledá se ve skrytých EXIF datech, které WhatsApp u některých fotek do
+souboru zapíše. Nemusí to tedy fungovat u úplně každé fotky nebo verze
+aplikace WhatsApp; když se popisek nenajde, fotka se prostě zobrazí bez něj
+(nic se nerozbije). Video popisky nepodporuje.
 
 ### Pokud bys chtěla/chtěl změnit sledované WhatsApp složky
 
@@ -136,10 +162,11 @@ private val SLEDOVANE_SLOZKY = listOf(
 
 ## Jak aplikace funguje (technický přehled)
 
-- **Kotlin + WebView**: nativní část jen řeší oprávnění k úložišti, každou
-  chvíli přečte seznam souborů z WhatsApp složek a předá ho do WebView. Celá
-  slideshow logika (přechody, časování, výběr dnešní/všech fotek) běží v
-  HTML/JS uvnitř WebView, stejně jako v původní verzi.
+- **Kotlin + WebView**: nativní část řeší oprávnění k úložišti, čte seznam
+  souborů z WhatsApp složek (a k fotkám zkouší najít i EXIF popisek/komentář),
+  a předá ho do WebView. Celá slideshow logika (přechody, časování, výběr
+  20 nejnovějších/všech fotek, přednostní zobrazení nové fotky) běží v
+  HTML/JS uvnitř WebView.
 - **Bez serveru**: žádný Node.js, žádný HTTP server. JavaScript ve WebView
   volá nativní metodu `AndroidMedia.ziskatSeznamMedii()` (JavascriptInterface)
   a dostane zpátky JSON seznam fotek/videí.

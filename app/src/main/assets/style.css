@@ -44,7 +44,30 @@ html, body {
   object-fit: contain;
 }
 
-/* Drobne pocitadlo v pravem dolnim rohu, napr. "3/47 celkem" nebo "2/5 nové" */
+/* Popisek (komentar z WhatsAppu) pod fotkou, pres cely spodek obrazovky */
+#popisek {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 44px;
+  z-index: 3;
+  text-align: center;
+  padding: 0 32px;
+  color: #ffffff;
+  font-family: -apple-system, Roboto, Arial, sans-serif;
+  font-size: 22px;
+  line-height: 1.4;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+  opacity: 0;
+  transition: opacity 1s ease;
+  pointer-events: none;
+}
+
+#popisek.visible {
+  opacity: 1;
+}
+
+/* Drobne pocitadlo v pravem dolnim rohu, napr. "3/47 celkem" nebo "2/5 nejnovější" */
 #pocitadlo {
   position: absolute;
   right: 14px;
